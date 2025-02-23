@@ -38,6 +38,7 @@ namespace NeedsToTest.API.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(Product product)
         {
+            product.Id = System.Guid.NewGuid().ToString();
             _context.Products.Add(product);
             await _context.SaveChangesAsync();
             return Ok(product);

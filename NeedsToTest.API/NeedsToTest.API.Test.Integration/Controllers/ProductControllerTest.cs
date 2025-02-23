@@ -57,6 +57,33 @@ namespace NeedsToTest.API.Test.Integration.Controllers
             products.First().Should().BeEquivalentTo(product);
         }
 
+        [Fact]
+        public async Task Post_QuandoDadosValidos_RetornaProdutoCriado()
+        {
+            //Arrange
+            var product = new Product
+            {
+                Id = "",
+                Name = "Teste",
+                Price = 10,
+                Categories = new List<string> { "Teste" }
+            };
+
+            //Act
+            var response = await _core.Client.PostAsJsonAsync("/api/Product", product);
+
+            //Assert
+            response.EnsureSuccessStatusCode();
+            var productResponse = await response.Content.ReadAsAsync<Product>();
+            productResponse.Name.Should().Be(product.Name);
+            productResponse.Price.Should().Be(product.Price);
+            productResponse.Categories.Should().BeEquivalentTo(product.Categories);
+            productResponse.Id.Should().NotBeNullOrEmpty();
+
+            var responseGet = await _core.Client.GetAsync($"/api/Product/{productResponse.Id}");
+            responseGet.EnsureSuccessStatusCode();
+        }
+
        
     }
 }
