@@ -84,6 +84,31 @@ namespace NeedsToTest.API.Test.Integration.Controllers
             responseGet.EnsureSuccessStatusCode();
         }
 
+        [Fact]
+        public async Task Get_QuandoPesquisarPorCategoria_SalvaResultadoNoRedis()
+        {
+            var product = new Product
+            {
+                Id = Guid.NewGuid().ToString(),
+                Name = "Teste",
+                Price = 10,
+                Categories = new List<string> { "Teste" }
+            };
+
+            await _core.InsertEntityDatabase(product);
+
+            //Act
+            var response = await _core.Client.GetAsync("/api/Product?category=Teste");
+
+
+            response.EnsureSuccessStatusCode();
+
+            var cache = await _core.GetListFromCache<Product>("category:Teste");
+            cache.Should().NotBeNull();
+
+
+        }
+
        
     }
 }

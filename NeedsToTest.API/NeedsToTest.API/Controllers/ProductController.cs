@@ -1,8 +1,12 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Bogus.Extensions.UnitedKingdom;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Bson.IO;
 using NeedsToTest.API.Data.Context;
 using NeedsToTest.API.Data.Entities;
+using StackExchange.Redis;
+using System.Text.Json;
 
 namespace NeedsToTest.API.Controllers
 {
@@ -12,10 +16,12 @@ namespace NeedsToTest.API.Controllers
     {
 
         private readonly MyAmazonDbContext _context;
+        private readonly IDatabase _redis;
 
-        public ProductController(MyAmazonDbContext context)
+        public ProductController(MyAmazonDbContext context, IDatabase redis)
         {
             _context = context;
+            _redis = redis;
         }
 
         [HttpGet]
@@ -25,8 +31,21 @@ namespace NeedsToTest.API.Controllers
             
             if (!string.IsNullOrEmpty(category))
             {
-                products = await _context.Products.Where(p => p.Categories.Contains(category)).ToListAsync();
-                
+
+                var keyCategory = $"category:{category}";
+                if(_redis.KeyExists(keyCategory))
+                {
+                    var dataCache = await _redis.StringGetAsync(keyCategory);
+                    var serializedProducts = JsonSerializer.Deserialize<List<Product>>(dataCache);
+                    products = serializedProducts;
+                }
+                else
+                {
+                    products = await _context.Products.Where(p => p.Categories.Contains(category)).ToListAsync();
+                    var serializedProducts = JsonSerializer.Serialize(products);
+                    await _redis.StringSetAsync(keyCategory, serializedProducts);
+                }
+               
             }
             else
             {

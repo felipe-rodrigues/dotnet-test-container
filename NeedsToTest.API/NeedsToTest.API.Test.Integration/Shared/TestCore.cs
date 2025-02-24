@@ -2,10 +2,12 @@
 using Microsoft.Extensions.DependencyInjection;
 using NeedsToTest.API.Data.Context;
 using NeedsToTest.API.Test.Integration.ApiFactory;
+using StackExchange.Redis;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace NeedsToTest.API.Test.Integration.Shared
@@ -59,6 +61,15 @@ namespace NeedsToTest.API.Test.Integration.Shared
             var allRecords = await dbSet.ToListAsync();
             dbSet.RemoveRange(allRecords);
             await db.SaveChangesAsync();
+        }
+
+        public async Task<IEnumerable<T>> GetListFromCache<T>(string key) where T : class
+        {
+            using var scope = _scopeFactory.CreateScope();
+            var redis = scope.ServiceProvider.GetRequiredService<IDatabase>();
+            var cacheData = await redis.StringGetAsync(key);
+            var data = JsonSerializer.Deserialize<IEnumerable<T>>(cacheData);
+            return data;
         }
 
         #endregion

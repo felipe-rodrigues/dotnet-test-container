@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using NeedsToTest.API.Data.Context;
 using NeedsToTest.API.Data.Seed;
+using StackExchange.Redis;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,7 +13,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 var dbConnectionString = builder.Configuration.GetConnectionString("Mongo");
+var redisCon = builder.Configuration.GetConnectionString("Redis");
 builder.Services.AddDbContext<MyAmazonDbContext>(op => op.UseMongoDB(dbConnectionString,"Marketplace"));
+builder.Services.AddSingleton<IDatabase>(op =>
+{
+    IConnectionMultiplexer con = ConnectionMultiplexer.Connect(redisCon);
+    return con.GetDatabase();
+});
 
 var app = builder.Build();
 
