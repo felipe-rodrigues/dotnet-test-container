@@ -34,12 +34,6 @@ namespace NeedsToTest.API.Test.Integration.ApiFactory
                 services.RemoveAll(typeof(IDatabase));
 
                 var connection = _database.GetConnectionString();
-
-                var options = new DbContextOptionsBuilder<MyAmazonDbContext>()
-                                   .UseMongoDB(connection, databaseName: "trackorderstest")
-                                   .Options;
-
-                services.AddSingleton(sp => options);
                 services.AddDbContext<MyAmazonDbContext>(op =>
                 {
                     op.UseMongoDB(connection, databaseName: "MarketplaceTest");
