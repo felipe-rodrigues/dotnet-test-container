@@ -32,7 +32,7 @@ namespace NeedsToTest.API.Test.Integration.Controllers
         }
 
         [Fact]
-        public async Task Get_QuandoDadosNaBase_RetornaListaDeProdutos()
+        public async Task Get_WithProductsInDatabase_ReturnListOfProducts()
         {
 
             //Arrange
@@ -58,7 +58,7 @@ namespace NeedsToTest.API.Test.Integration.Controllers
         }
 
         [Fact]
-        public async Task Post_QuandoDadosValidos_RetornaProdutoCriado()
+        public async Task Post_WhenValidRequest_ReturnsCreatedProduct()
         {
             //Arrange
             var product = new Product
@@ -85,7 +85,7 @@ namespace NeedsToTest.API.Test.Integration.Controllers
         }
 
         [Fact]
-        public async Task Get_QuandoPesquisarPorCategoria_SalvaResultadoNoRedis()
+        public async Task Get_WhenSearchingByCategory_SaveDataToRedis()
         {
             var product = new Product
             {
